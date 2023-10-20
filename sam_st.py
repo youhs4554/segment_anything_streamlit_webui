@@ -61,6 +61,7 @@ def click(container_width,height,scale,radius_width,show_mask,model,im):
             else:
                 input_labels.append(0)
         
+        masks = None
         if 'color_change_point' in st.session_state:
             p = st.session_state['color_change_point']
             if len(df) < p:
@@ -88,11 +89,17 @@ def click(container_width,height,scale,radius_width,show_mask,model,im):
             if im != st.session_state['im']:
                 rerun = True
             st.session_state['im'] = im
+            if masks is not None:
+                st.session_state['mask'] = Image.fromarray(masks[0])
             if rerun:
                 st.experimental_rerun()
         im_bytes = BytesIO()
         st.session_state['im'].save(im_bytes,format='PNG')
-        st.download_button('Download image',data=im_bytes.getvalue(),file_name='seg.png')
+        st.download_button('Download result',data=im_bytes.getvalue(),file_name='result.png')
+        if st.session_state['mask']:
+            mask_bytes = BytesIO()
+            st.session_state['mask'].save(mask_bytes,format='PNG')
+            st.download_button('Download mask',data=mask_bytes.getvalue(),file_name='mask.png')
 
 def box(container_width,height,scale,radius_width,show_mask,model,im):
     for each in ['color_change_point','input_masks_color']:
